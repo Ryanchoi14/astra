@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>소행성 클릭 게임</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        text-align: center;
+        background: #030710;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    h1 {
+        margin-top: 10px;
+    }
+
+    #description {
+        font-size: 14px;
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
+
+    #game {
+        width: 350px;
+        height: 600px;
+        background: #0b0f1a;
+        margin: 15px auto;
+        border: 3px solid #223;
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .asteroid {
+        width: 60px;
+        height: 60px;
+        background: #5b5b5b;
+        border-radius: 50%;
+        position: absolute;
+        top: -80px;
+        transform: translateX(-50%);
+        transition: transform 0.18s ease-out, opacity 0.18s;
+
+        /* 하늘색 Glow */
+        box-shadow:
+            0 0 10px #4deaff,
+            0 0 20px #4deaff,
+            0 0 30px #4deaff;
+        border: 2px solid #7df2ff;
+    }
+
+    /* 파괴 효과용 */
+    .destroyed {
+        transform: scale(0.1) rotate(45deg);
+        opacity: 0;
+        filter: brightness(2);
+    }
+
+    #score {
+        font-size: 24px;
+        margin-top: 10px;
+    }
+
+    #startBtn {
+        padding: 10px 20px;
+        font-size: 18px;
+        background: #2a72ff;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🚀 소행성 방어 게임</h1>
+<div id="description">
+    떨어지는 소행성을 <b>클릭 또는 터치</b>해서 파괴하세요!
+</div>
+
+<div id="score">점수: 0</div>
+<button id="startBtn">게임 시작</button>
+
+<div id="game"></div>
+
+<script>
+let game = document.getElementById("game");
+let score = 0;
+let playing = false;
+
+document.getElementById("startBtn").addEventListener("click", startGame);
+
+function startGame() {
+    playing = true;
+    score = 0;
+    document.getElementById("score").innerText = "점수: 0";
+    document.getElementById("startBtn").style.display = "none";
+
+    spawnAsteroid();
+}
+
+function spawnAsteroid() {
+    if (!playing) return;
+
+    let ast = document.createElement("div");
+    ast.className = "asteroid";
+
+    let x = 50 + Math.random() * 250;
+    ast.style.left = x + "px";
+    game.appendChild(ast);
+
+    // ★ 빠른 속도
+    let fallSpeed = 3 + Math.random() * 3;
+
+    function move() {
+        let top = parseFloat(ast.style.top || "-80");
+        top += fallSpeed;
+        ast.style.top = top + "px";
+
+        // 아래로 벗어나면 제거
+        if (top > 620) {
+            ast.remove();
+            return;
+        }
+
+        requestAnimationFrame(move);
+    }
+    requestAnimationFrame(move);
+
+    // 클릭 / 터치 → 파괴
+    ast.addEventListener("pointerdown", () => destroyAsteroid(ast));
+
+    // 다음 소행성 생성 딜레이
+    setTimeout(spawnAsteroid, 400 + Math.random() * 400);
+}
+
+function destroyAsteroid(ast) {
+    score += 100;
+    document.getElementById("score").innerText = "점수: " + score;
+
+    // 파괴 애니메이션 적용
+    ast.classList.add("destroyed");
+
+    setTimeout(() => ast.remove(), 180);
+}
+</script>
+
+</body>
+</html>
